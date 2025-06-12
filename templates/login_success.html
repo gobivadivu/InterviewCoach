@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Login Success{% endblock %}
+
+{% block page_content %}
+<div class="row">
+    <div class ="col-md-6 offset-md-3">
+        <h2> Login Successful</h2>
+        <p> Welcome back! <br> We'll be available soon
+        Stay Tuned.
+        <a href="{% url 'audio_upload' %}" class="btn btn-primary">
+            Upload Response
+        </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

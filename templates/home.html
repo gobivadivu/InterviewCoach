@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Home Page{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2>Welcome to Smart Interview Coach</h2>
+        <p>This is a platform to help you prepare for interviews with AI-powered coaching.</p>
+        <p>
+            <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
