@@ -10,10 +10,10 @@ Features
 - User History
 
 Tech Stack
- Backend         - Django 
- Frontend        - HTML/CSS + Django Templates 
- Speech-to-Text  - Whisper
- DB              - SQLite (default)
+ Backend         - Django       
+ Frontend        - HTML/CSS + Django Templates       
+ Speech-to-Text  - Whisper        
+ DB              - SQLite (default)            
  Deployment      -                 
  Version Control - Git + GitHub 
   
