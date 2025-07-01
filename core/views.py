@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect
 import whisper
+import numpy
 from .models import InterviewResponse
 
 # Create your views here.
@@ -58,13 +59,12 @@ def audio_input(request):
             file_path = qresponse.audio_file.path  # Get the actual file path
             result = model.transcribe(file_path)
 
-            model = whisper.load_model("base")
-            result = model.transcribe(file_path)
             qresponse.transcript = result['text']
             qresponse.save()
             
+            responses = InterviewResponse.objects.filter(user=request.user).order_by('-created_at')
             messages.success(request, "Audio file uploaded successfully.")
-            return render(request, 'audio_success.html', {'transcript': result['text']})
+            return render(request, 'audio_upload.html', {'form': form, 'responses': responses})
     else:
         form = FileUploadForm()
     return render(request, 'audio_upload.html', {'form': form})

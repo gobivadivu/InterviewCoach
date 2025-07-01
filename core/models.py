@@ -20,4 +20,3 @@ class InterviewResponse(models.Model):
     audio_file = models.FileField(upload_to='audio/')
     transcript = models.CharField(blank = True, max_length=2000)
     created_at = models.DateTimeField(auto_now_add=True)
-

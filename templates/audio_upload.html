@@ -9,4 +9,11 @@
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Upload</button>
 </form>
+{% for item in responses %}
+  <p><strong>Uploaded:</strong> {{ item.created_at }}</p>
+  <audio controls src="{{ item.audio_file.url }}"></audio>
+  <p><strong>Transcript:</strong> {{ item.transcript }}</p>
+  <hr>
+{% endfor %}
+
 {%endblock%}
