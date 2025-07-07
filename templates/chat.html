@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+     Smart Interview Coach 
+{% endblock title %}
+{% block page_content %}
+<div class="chat-container">
+    <h2> Smart Interview Coach </h2>
+    <div class="chat-box">
+        {% for line in chat_log %}
+            <div class="chat-line"> {{ line }} </div>
+        {% endfor %}
+    </div>
+
+    {% if final_feedback %}
+        <h3> Final Feedback: </h3>
+        <p> {{ final_feedback }}</p>
+    {% else %}
+        {% if not interview_type %}
+            <form method="post">
+                {% csrf_token %}
+                <label> Select interview type: </label>
+                <button type="submit" name="question_type" value="technical">Technical</button>
+                <button type="submit" name="question_type" value="hr">HR</button>
+            </form>
+        {% elif show_question %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit"> Upload Audio </button>
+            </form>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" name="end_interview" value="true">End Interview</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock page_content %}

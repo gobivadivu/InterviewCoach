@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 import whisper
 import numpy
 from .models import InterviewResponse
-
+from .openai_helper import generate_follow_up_question, generate_final_feedback
 # Create your views here.
 def home(request):
     return render(request, 'home.html')
@@ -36,35 +36,72 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 # Log the user in
-                print("Logging in user:", user.username)  # Debugging line
                 login(request, user)
-                return render(request, 'login_success.html', {'user': user})
+                return redirect('chatbot_interview')
             else:
-                print("Hello")
                 messages.error(request, "Invalid username or password.")
     else:
-        print("HHH")
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
-def audio_input(request):
+def chatbot_interview(request):
+    if 'question_count' not in request.session:
+        request.session['question_count'] = 0
+        request.session['transcript_history'] = []
+        request.session['interview_type'] = None
+
+    count = request.session['question_count']
+    history = request.session['transcript_history']
+    interview_type = request.session['interview_type']
+
+    chat_log = []
+
     if request.method == "POST":
-        form = FileUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            audio_file = form.cleaned_data['audio_file']
-            qresponse = InterviewResponse(user=request.user, audio_file=audio_file)
-            qresponse.save()
+        if 'question_type' in request.POST:
+            interview_type = request.POST['question_type']
+            request.session['interview_type'] = interview_type
+        elif 'end_interview' in request.POST:
+            final_feedback = generate_final_feedback(history, interview_type)
+            request.session.flush()
+            return render(request, 'chat.html', {'chat_log':history, 'final_feedback':final_feedback})
+        else:
+            form = FileUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                audio_file = form.cleaned_data['audio_file']
+                response = InterviewResponse(user=request.user, audio_file=audio_file)
+                response.save()
 
-            model = whisper.load_model("base")  # Use "base" or "small" for deployable testing
-            file_path = qresponse.audio_file.path  # Get the actual file path
-            result = model.transcribe(file_path)
+                model = whisper.load_model("base")
+                result = model.transcribe(response.audio_file.path)
+                transcript = result['text']
 
-            qresponse.transcript = result['text']
-            qresponse.save()
-            
-            responses = InterviewResponse.objects.filter(user=request.user).order_by('-created_at')
-            messages.success(request, "Audio file uploaded successfully.")
-            return render(request, 'audio_upload.html', {'form': form, 'responses': responses})
-    else:
-        form = FileUploadForm()
-    return render(request, 'audio_upload.html', {'form': form})
+                response.transcript = transcript
+                response.save()
+
+                history.append(f"User: {transcript}")
+
+                count+=1
+                request.session['question_count'] = count
+                request.session['transcript_history'] = history
+
+                if count>=5:
+                    chat_log = history
+                    chat_log.append("You've completed 5 questions. End interview to get feedback or continue answering.")
+                    return render(request, 'chat.html', {
+                        'chat_log': chat_log,
+                        'form': FileUploadForm(),
+                        'show_question': False
+                    })
+    if interview_type and count < 5:
+        question = generate_follow_up_question(history, interview_type)
+        history.append(f"AI: {question}")
+        request.session['transcript_history'] = history
+    
+    return render(request, 'chat.html', {
+        'chat_log': history,
+        'form': FileUploadForm(),
+        'show_question': True,
+        'interview_type': interview_type
+    })
+
+
