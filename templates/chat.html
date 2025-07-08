@@ -26,14 +26,10 @@
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit"> Upload Audio </button>
+                <button type="submit" name="upload" value="true">Upload Audio</button>
+            <button type="submit" name="end_interview" value="true">End Interview</button>
             </form>
         {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" name="end_interview" value="true">End Interview</button>
-        </form>
     {% endif %}
 </div>
 {% endblock page_content %}

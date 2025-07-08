@@ -92,6 +92,9 @@ def chatbot_interview(request):
                         'form': FileUploadForm(),
                         'show_question': False
                     })
+                print("TRANSCRIPT:", transcript)
+                print("HISTORY:", history)
+
     if interview_type and count < 5:
         question = generate_follow_up_question(history, interview_type)
         history.append(f"AI: {question}")
